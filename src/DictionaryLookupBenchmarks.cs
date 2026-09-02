@@ -23,6 +23,7 @@ public class DictionaryLookupBenchmarks
         }
     }
 
+    // Baseline = true indicates that this benchmark is the reference for comparison.
     [Benchmark(Baseline = true)]
     public bool DictionaryLookup()
     {

@@ -8,6 +8,8 @@ public class Program()
         //BenchmarkRunner.Run<StringConcatBenchmarks>();
         //BenchmarkRunner.Run<SumBenchmarks>();
         //BenchmarkRunner.Run<SetupIsolationBenchmarks>();
-        BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
+        //BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
+        //BenchmarkRunner.Run<SumGapBenchmarks>();
+        BenchmarkRunner.Run<DisassemblyBenchmarks>();
     }
 }
