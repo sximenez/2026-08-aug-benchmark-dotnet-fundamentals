@@ -28,7 +28,7 @@ graph LR
 style D fill:yellow
 ```
 
-**Roslyn (recipe writing)**: 
+**Roslyn (recipe writing)**
 
 The recipe writer (`Roslyn` compiler) turns C# source code into a universal recipe (Intermediate language `IL`). 
 
@@ -40,7 +40,7 @@ The recipe is stored in a box (`assembly`):
 
 - if the box is marked `.dll`, its ingredients are not ready to bake until referenced by an .exe.
 
-**JIT (recipe baking)**:
+**JIT (recipe baking)**
 
 The kitchen manager (`runtime`) hires the baker (`Just-In-Time` compiler) only when an order comes in (`lazy`).
 
@@ -73,13 +73,19 @@ BenchmarkDotNet isolates the noise to reflect the performance of the recipe.
 
 ### The two kitchens workflow (sandboxing)
 
-The runner uses two kitchens (`processes`) to bake the recipe.
+The runner uses two kitchens to bake the recipe.
 
-Kitchen 1 (`in-process`) is used for **writing** (`compilation`). No cooking happens here.
+Kitchen 1: **the host** (the process you launch with `dotnet run -c Release`).
 
-Kitchen 2 (`out-of-process`) is used for **baking** (`execution`) without any noise from the writing process.
+This is were the recipe is **written and compiled**. Nothing is baked here.
 
-In a same run, each recipe is baked in a separate out-of-process kitchen.
+Kitchen 2: **the child** (a fresh process, one per recipe).
+
+This is were the recipe is **baked and executed**,
+
+free from any noise from writing.
+
+Each recipe in a run gets its own kitchen 2 (a brand-new OS process independent from the launch process).
 
 See [StringConcatBenchmarks](src/StringConcatBenchmarks.cs).
 
@@ -150,7 +156,7 @@ If the ranges overlap, you cannot say one method is faster than the other.
 
 See [SetupIsolationBenchmarks](src/SetupIsolationBenchmarks.cs).
 
-When benchmarking using dependencies, the benchmark should isolate the dependency from the baking.
+When benchmarking using dependencies, the benchmark should isolate the dependency from the baking using `[GlobalSetup]`.
 
 Otherwise, setup cost gets leaked into the results.
 
@@ -185,7 +191,7 @@ public double SumWithInlineSetup()
 
 See [DictionaryLookupBenchmarks](src/DictionaryLookupBenchmarks.cs).
 
-`[Params]` is class-level: every recipe within the class is baked with those ingredients.
+`[Params]` is **class-level**: every recipe within the class is baked with those ingredients.
 
 ```terminal
 // Dictionary lookup is O(1) and list lookup is O(n).
@@ -244,7 +250,8 @@ N=1,000,000                            [31,538 ——————————— 32,497]           ±1.
 
 See [ArgumentsBenchmarks](src/ArgumentsBenchmarks.cs).
 
-`[Arguments]` is method-level: the specific recipe is baked with those ingredients (equivalent of `[Theory][InlineData]` in xUnit).
+`[Arguments]` is **method-level**: the specific recipe is baked with those ingredients (equivalent of `[Theory][InlineData]` in xUnit).
+
 `[ArgumentsSource]` is an abstraction of `[Arguments]` that need more compute within a submethod.
 
 ```terminal
