@@ -10,6 +10,8 @@ public class Program()
         //BenchmarkRunner.Run<SetupIsolationBenchmarks>();
         //BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
         //BenchmarkRunner.Run<SumGapBenchmarks>();
-        BenchmarkRunner.Run<DisassemblyBenchmarks>();
+        //BenchmarkRunner.Run<DisassemblyBenchmarks>();
+        //BenchmarkRunner.Run<ThreadingBenchmarks>();
+        BenchmarkRunner.Run<ThreadingThresholdBenchmarks>();
     }
 }

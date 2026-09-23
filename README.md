@@ -356,3 +356,59 @@ M00_L02:
        int       3
 ; Total bytes of code 64
 ```
+
+### Stage 7 - Threading diagnoser
+
+Mono-thread: **one waiter**.
+
+In a kitchen, if there is one waiter, then every table has to queue and wait for their order to be served.
+
+Multi-thread: **many waiters**. 
+
+In a kitchen, if there are many waiters, then many tables can be served at the same time.
+
+*Multi-threading is a way to increase throughput by having many tasks run in parallel.*
+
+The number of waiters is the `thread pool`.
+
+|Concept|Description|Confirmed by|
+|-----|-----------|--------|
+|**Thread pool dispatch**|Number of orders given to the waiters.|`Completed Work Items` column.|
+|**Overhead**|Waiter standing idle the time an order is dispatched.|Small, stable `Completed Work Items` (~1) or elevated but consistent `Mean`.|
+|**Starvation**|Not enough waiters for the number of orders.|`Completed Work Items` climbing or degraded `Mean`.|
+|**Lock Contentions**|Two waiters fighting for the same order at once.|`Lock Contentions` > 0.|
+
+See [ThreadingBenchmarks](src/ThreadingBenchmarks.cs).
+
+```terminal
+// Multi-threading has a cost: if the work is "cheap" (low CPU cost), then single-threading may be faster.
+// This is the case here: for cheap work (simple arithmetic operation), multi-threading produces too much overhead.
+// There is a crossover point where the work becomes "expensive" enough to be worth parallelizing.
+
+| Method    | Mean     | Error    | StdDev   | Ratio | RatioSD | Completed Work Items | Lock Contentions | Gen0   | Allocated | Alloc Ratio |
+|---------- |---------:|---------:|---------:|------:|--------:|---------------------:|-----------------:|-------:|----------:|------------:|
+| SyncWork  | 241.3 ns |  2.19 ns |  1.94 ns |  1.00 |    0.01 |                    - |                - |      - |         - |          NA |
+| AsyncWork | 994.4 ns | 18.62 ns | 15.55 ns |  4.12 |    0.07 |               1.0040 |           0.0000 | 0.0095 |     168 B |          NA |
+```
+
+See [ThreadingThresholdBenchmarks](src/ThreadingThresholdBenchmarks.cs).
+
+```terminal
+// Parallelizing expensive work (here by 8 threads) only begins to pay off around WorkPerItem (loops) = 500 (crossover point).
+// Below that, dispatch-tax dominates and single-threading is actually faster. Above that, multi-threading is worth implementing.
+// The crossover point is not universal: it depends on the number of threads, for example, with 4 threads, the crossover point will be around WorkPerItem = 1000.
+
+| Method     | WorkPerItem | Mean        | Error     | StdDev    | Ratio | RatioSD | Gen0   | Completed Work Items | Lock Contentions | Allocated | Alloc Ratio |
+|----------- |------------ |------------:|----------:|----------:|------:|--------:|-------:|---------------------:|-----------------:|----------:|------------:|
+| Sequential | 10          |    90.64 ns |  0.675 ns |  0.631 ns |  1.00 |    0.01 |      - |                    - |                - |         - |          NA |
+| Parallel   | 10          | 2,707.90 ns | 18.338 ns | 15.313 ns | 29.88 |    0.26 | 0.1144 |               8.0029 |           0.0000 |    1794 B |          NA |
+|            |             |             |           |           |       |         |        |                      |                  |           |             |
+| Sequential | 100         |   948.18 ns | 13.762 ns | 12.873 ns |  1.00 |    0.02 |      - |                    - |                - |         - |          NA |
+| Parallel   | 100         | 2,878.84 ns | 19.336 ns | 17.141 ns |  3.04 |    0.04 | 0.1144 |               8.0018 |           0.0001 |    1798 B |          NA |
+|            |             |             |           |           |       |         |        |                      |                  |           |             |
+| Sequential | 500         | 4,803.70 ns | 59.900 ns | 56.031 ns |  1.00 |    0.02 |      - |                    - |                - |         - |          NA |
+| Parallel   | 500         | 4,069.29 ns | 42.497 ns | 39.752 ns |  0.85 |    0.01 | 0.1144 |               8.0002 |           0.0001 |    1800 B |          NA |
+|            |             |             |           |           |       |         |        |                      |                  |           |             |
+| Sequential | 1000        | 9,618.92 ns | 82.958 ns | 73.540 ns |  1.00 |    0.01 |      - |                    - |                - |         - |          NA |
+| Parallel   | 1000        | 6,280.97 ns | 77.290 ns | 68.515 ns |  0.65 |    0.01 | 0.1144 |               8.0002 |           0.0001 |    1800 B |          NA |
+```
