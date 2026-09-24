@@ -63,6 +63,8 @@ BenchmarkDotNet isolates the noise to reflect the performance of the recipe.
 |**ThreadPool**|Recipes that use threads (parallel tasks) need waiters to serve tables. Waiters can either idle (`overhead`) or tire (`starvation`), slowing down service.|Baking the recipe multiple time so that the waitstaff is stable (`steady state`).|
 |**Optimizations**|The baker may skip steps (Dead Code Elimination) if the cake isn't eaten.|Returning the result so BenchmarkDotNet can "eat" it (consume it), forcing the baker to cook.|
 
+---
+
 ## Tutorials
 
 ### Stage 1 - First benchmark
@@ -109,6 +111,8 @@ public static void Main(string[] args)
 | StringBuilderAppend | 146.0 ns |  2.86 ns |  6.28 ns |
 ```
 
+---
+
 ### Stage 2 - Reading the statistics
 
 See [SumBenchmarks](src/SumBenchmarks.cs).
@@ -152,6 +156,8 @@ Concat:                                              [799 —————— 832]
 
 If the ranges overlap, you cannot say one method is faster than the other.
 
+---
+
 ### Stage 3 - Isolating setup cost
 
 See [SetupIsolationBenchmarks](src/SetupIsolationBenchmarks.cs).
@@ -186,6 +192,8 @@ public double SumWithInlineSetup()
 | SumWithGlobalSetup | 395.9 ns |  5.57 ns |  5.21 ns |  1.00 |    0.02 |
 | SumWithInlineSetup | 925.2 ns | 18.11 ns | 22.25 ns |  2.34 |    0.06 |
 ```
+
+---
 
 ### Stage 4 - Params & arguments
 
@@ -271,6 +279,8 @@ But this could be caused by noise rather than performance...
 
 BDN provides tools for in-depth analysis of results.
 
+---
+
 ### Stage 5 - Memory diagnoser
 
 `[MemoryDiagnoser]` measures memory allocation and garbage collection.
@@ -291,6 +301,8 @@ It outputs those results as well, allowing to rule out those as source of perfor
 | SumRange | 24.99 us | 0.497 us | 0.843 us |  1.00 |    0.05 |         - |          NA |
 | SumArray | 31.50 us | 0.594 us | 0.583 us |  1.26 |    0.05 |         - |          NA |
 ```
+
+---
 
 ### Stage 6 - Disassembly diagnoser
 
@@ -357,9 +369,13 @@ M00_L02:
 ; Total bytes of code 64
 ```
 
+---
+
 ### Stage 7 - Threading diagnoser
 
-Mono-thread: **one waiter**.
+Baking a recipe can be done:
+
+Single-thread: **one waiter**.
 
 In a kitchen, if there is one waiter, then every table has to queue and wait for their order to be served.
 
@@ -411,4 +427,24 @@ See [ThreadingThresholdBenchmarks](src/ThreadingThresholdBenchmarks.cs).
 |            |             |             |           |           |       |         |        |                      |                  |           |             |
 | Sequential | 1000        | 9,618.92 ns | 82.958 ns | 73.540 ns |  1.00 |    0.01 |      - |                    - |                - |         - |          NA |
 | Parallel   | 1000        | 6,280.97 ns | 77.290 ns | 68.515 ns |  0.65 |    0.01 | 0.1144 |               8.0002 |           0.0001 |    1800 B |          NA |
+```
+
+---
+
+### Final stage - Redis test
+
+```terminal
+// In this distributed test, the network round-trips are clearly costlier than an in-process lookup (130_000x).
+// Whether the key exists or not in Redis (warm vs cold) is negligible.
+// The MultimodalDistribution means that network variance is real: in a shared resource, some requests are served faster than others (expected, not a flaw).
+
+| Method           | Mean           | Error          | StdDev         | Ratio      | RatioSD   | Allocated | Alloc Ratio |
+|----------------- |---------------:|---------------:|---------------:|-----------:|----------:|----------:|------------:|
+| LocalLookup      |       2.038 ns |      0.0632 ns |      0.0591 ns |       1.00 |      0.04 |         - |          NA |
+| RedisGetWarm     | 271,909.232 ns | 10,716.4605 ns | 31,597.7277 ns | 133,534.56 | 15,905.19 |     224 B |          NA |
+| RedisGetCold     | 286,354.574 ns |  7,236.4705 ns | 20,291.8405 ns | 140,628.66 | 10,684.44 |     160 B |          NA |
+
+// * Warnings *
+MultimodalDistribution
+  RedisBenchmarks.RedisGetWarm: Default -> It seems that the distribution is multimodal (mValue = 4.75)
 ```

@@ -1,5 +1,5 @@
 ﻿using BenchmarkDotNet.Running;
-using BenchmarkDotNetFundamentals;
+using BenchmarkDotNetFundamentals.Redis;
 
 public class Program()
 {
@@ -12,6 +12,7 @@ public class Program()
         //BenchmarkRunner.Run<SumGapBenchmarks>();
         //BenchmarkRunner.Run<DisassemblyBenchmarks>();
         //BenchmarkRunner.Run<ThreadingBenchmarks>();
-        BenchmarkRunner.Run<ThreadingThresholdBenchmarks>();
+        //BenchmarkRunner.Run<ThreadingThresholdBenchmarks>();
+        BenchmarkRunner.Run<RedisBenchmarks>();
     }
 }
