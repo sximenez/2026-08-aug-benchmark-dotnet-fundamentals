@@ -1,9 +1,10 @@
 ﻿using BenchmarkDotNet.Attributes;
 
-namespace BenchmarkDotNetFundamentals;
+namespace BenchmarkDotNetFundamentals.Stages;
 
 [MemoryDiagnoser]
-public class SumGapBenchmarks
+[DisassemblyDiagnoser(printSource: true, maxDepth: 3)]
+public class DisassemblyBenchmarks
 {
     private const int N = 100_000;
     private int[] _array = null!;

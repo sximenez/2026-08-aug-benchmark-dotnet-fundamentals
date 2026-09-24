@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 
-namespace BenchmarkDotNetFundamentals;
+namespace BenchmarkDotNetFundamentals.Stages;
 
 public class SetupIsolationBenchmarks
 {
