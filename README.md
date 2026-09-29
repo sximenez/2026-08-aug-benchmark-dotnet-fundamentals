@@ -2,14 +2,17 @@
 
 Introduction to BenchmarkDotNet, a library to microbenchmark code performance.
 
-Refreshes the concept of compilation flow of a program.
+And to the four sources of runtime noise that impact results.
 
-Built stage by stage, from simple to complex.
+Review of the concept of compilation flow of a program.
+
+Approached in incremental stages, from simple benchmark to network test.
 
 ---
 
 ## Table of Contents
 
+- [TL;DR](#tldr)
 - [Setup](#setup)
 - [Explanation](#explanation)
   - [Compilation flow](#compilation-flow)
@@ -23,6 +26,34 @@ Built stage by stage, from simple to complex.
   - [Stage 6 - Disassembly diagnoser](#stage-6---disassembly-diagnoser)
   - [Stage 7 - Threading diagnoser](#stage-7---threading-diagnoser)
   - [Final stage - Redis test](#final-stage---redis-test)
+
+---
+
+## TL;DR
+
+**Sandboxing**: Compilation is a kitchen baking code cakes that the CPU eats. 
+
+Two kitchens: the host writes, the child bakes.
+
+**Noise**: Four costs pollute the bake: JIT, GC, ThreadPool, Optimizations. 
+
+Warmup, forced cleanup, and returning results absorb them.
+
+**Statistics**: `Mean` is a guess. `Error` is the oven temperature. 
+
+Overlapping ranges mean no difference was measured.
+
+**Structure**: Dependencies can be isolated using `[GlobalSetup]`. 
+
+`[Params]` show complexity. Diagnosers reveal the cause.
+
+**Diagnosers**: Memory shows allocation. Disassembly shows instructions. 
+
+Threading shows waiters: too few starve, too many idle.
+
+**Multi-threading**: More waiters cost dispatch time. Cheap work parallelized is slower. 
+
+Past a crossover point where work becomes expensive enough, extra waiters pay off.
 
 ---
 
