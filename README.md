@@ -78,6 +78,8 @@ graph LR
 style D fill:yellow
 ```
 
+Compilation is a kitchen baking code cakes that the CPU eats.
+
 **Roslyn (recipe writing)**
 
 The recipe writer (`Roslyn` compiler) turns C# source code into a universal recipe (Intermediate language `IL`). 
@@ -176,7 +178,7 @@ graph LR
 // Mean = average cost per operation.
 // StdDev = how much individual runs varied.
 // StdErr = how much the Mean itself could be off.
-// Error (table) = half the 99.9% confidence interval — the number to trust.
+// Error (table) = half the 99.9% confidence interval â€” the number to trust.
 
 Mean = 394.221 ns, StdErr = 1.477 ns (0.37%), N = 14, StdDev = 5.527 ns
 
@@ -187,8 +189,8 @@ Mean = 394.221 ns, StdErr = 1.477 ns (0.37%), N = 14, StdDev = 5.527 ns
 ```
 
 ```terminal
-SumReturned:   [388 ————————————— 400]
-SumDiscarded:     [391 —————————— 400]
+SumReturned:   [388 â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” 400]
+SumDiscarded:     [391 â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” 400]
 
 // One range sits almost entirely inside the other.
 // You genuinely cannot say one method is faster.
@@ -196,7 +198,7 @@ SumDiscarded:     [391 —————————— 400]
 
 ```terminal
 StringBuilder: [143 - 149]
-Concat:                                              [799 —————— 832]
+Concat:                                              [799 â€”â€”â€”â€”â€”â€” 832]
 
 // Nowhere close to touching. 
 // No ambiguity: Concat is unambiguously, provably slower.
@@ -294,16 +296,16 @@ See [DictionaryLookupBenchmarks](src/Stages/DictionaryLookupBenchmarks.cs).
 | DictionaryLookup | 1000000 |      1.222 ns |   0.0564 ns |   0.0554 ns |      1.00 |     0.06 |
 | ListLookup       | 1000000 | 32,017.582 ns | 479.3180 ns | 512.8649 ns | 26,241.83 | 1,226.67 |
 
-// For ListLookup, the bracket is Mean ± Error.
+// For ListLookup, the bracket is Mean Â± Error.
 // StdErr = (Error / Mean) * 100; it shows that with larger N, the relative error decreases, making the results more trustworthy.
 // If the StdErr would have been 2%, 15%, 40%... that would have been a red flag, indicating that the results were unreliable at scale.
 
-N=10        [1.28 - 1.38]                                                    ±3.5%
-N=100            [3.12 - 3.29]                                               ±2.7%
-N=1,000               [27.1 —— 28.3]                                         ±2.1%
-N=10,000                   [230 ——— 239]                                     ±1.9%
-N=100,000                        [2,266 ————— 2,320]                         ±1.2%
-N=1,000,000                            [31,538 ——————————— 32,497]           ±1.5%
+N=10        [1.28 - 1.38]                                                    Â±3.5%
+N=100            [3.12 - 3.29]                                               Â±2.7%
+N=1,000               [27.1 â€”â€” 28.3]                                         Â±2.1%
+N=10,000                   [230 â€”â€”â€” 239]                                     Â±1.9%
+N=100,000                        [2,266 â€”â€”â€”â€”â€” 2,320]                         Â±1.2%
+N=1,000,000                            [31,538 â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” 32,497]           Â±1.5%
 ```
 
 See [ArgumentsBenchmarks](src/Stages/ArgumentsBenchmarks.cs).
